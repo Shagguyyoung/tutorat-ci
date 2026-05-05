@@ -1,0 +1,120 @@
+import { useState } from "react"
+import { Link } from "react-router-dom"
+import { Mail, Lock, Eye, EyeOff } from "lucide-react"
+
+export default function ConnexionPage() {
+    const [email, setEmail] = useState("")
+    const [motDePasse, setMotDePasse] = useState("")
+    const [afficherMdp, setAfficherMdp] = useState(false)
+    const [erreur, setErreur] = useState("")
+
+    function handleSubmit(e) {
+        e.preventDefault()
+        setErreur("")
+
+        //Validation simple
+        if (!email || !motDePasse) {
+            setErreur("Veuiller remplir tous les champs.")
+            return
+        }
+        // Ici on appeler L'API Laravel plus tard
+        alert('connexion avec : ${email}')
+    }
+
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6 py-16">
+      <div className="w-full max-w-md">
+
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link to="/" className="text-2xl font-extrabold text-violet-600">
+            Tutorat<span className="text-gray-900">CI</span>
+          </Link>
+          <h1 className="text-2xl font-extrabold text-gray-900 mt-6">
+            Content de vous revoir !
+          </h1>
+          <p className="text-gray-400 mt-2">Connectez-vous à votre compte</p>
+        </div>
+
+        {/* Formulaire */}
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+
+          {/* Message d'erreur */}
+          {erreur && (
+            <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-6">
+              {erreur}
+            </div>
+          )}
+
+          <div className="space-y-5">
+
+            {/* Email */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700 block mb-2">
+                Adresse email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="email"
+                  placeholder="exemple@gmail.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Mot de passe */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-semibold text-gray-700">
+                  Mot de passe
+                </label>
+                <a href="#" className="text-xs text-violet-600 hover:underline">
+                  Mot de passe oublié ?
+                </a>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type={afficherMdp ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={motDePasse}
+                  onChange={e => setMotDePasse(e.target.value)}
+                  className="w-full pl-11 pr-12 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setAfficherMdp(!afficherMdp)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {afficherMdp ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Bouton */}
+            <button
+              onClick={handleSubmit}
+              className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-4 rounded-2xl transition-colors mt-2"
+            >
+              Se connecter
+            </button>
+
+          </div>
+
+          {/* Lien inscription */}
+          <p className="text-center text-gray-500 text-sm mt-6">
+            Pas encore de compte ?{" "}
+            <Link to="/inscription" className="text-violet-600 font-semibold hover:underline">
+              S'inscrire
+            </Link>
+          </p>
+
+        </div>
+      </div>
+    </div>
+  )
+}
