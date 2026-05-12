@@ -1,7 +1,8 @@
+import { useAuth } from "../AuthContext"
+import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Mail, Lock, Eye, EyeOff, User } from "lucide-react"
-
 export default function InscriptionPage() {
   const [form, setForm] = useState({
     prenom: "",
@@ -12,27 +13,41 @@ export default function InscriptionPage() {
   })
   const [afficherMdp, setAfficherMdp] = useState(false)
   const [erreur, setErreur] = useState("")
+  const { inscription } = useAuth()
+  const navigate = useNavigate()
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  function handleSubmit(e) {
-    e.preventDefault()
-    setErreur("")
+  async function handleSubmit(e) {
+  e.preventDefault()
+  setErreur("")
 
-    if (!form.prenom || !form.nom || !form.email || !form.motDePasse) {
-      setErreur("Veuillez remplir tous les champs.")
-      return
-    }
-    if (form.motDePasse.length < 8) {
-      setErreur("Le mot de passe doit contenir au moins 8 caractères.")
-      return
-    }
-
-    // Ici on appellera l'API Laravel plus tard
-    alert(`Inscription en tant que ${form.role} : ${form.email}`)
+  if (!form.prenom || !form.nom || !form.email || !form.motDePasse) {
+    setErreur("Veuillez remplir tous les champs.")
+    return
   }
+  if (form.motDePasse.length < 8) {
+    setErreur("Le mot de passe doit contenir au moins 8 caractères.")
+    return
+  }
+
+  try {
+    const user = await inscription(form)
+    if (user.role === "tuteur") {
+      navigate("/dashboard-tuteur")
+    } else {
+      navigate("/dashboard")
+    }
+  } catch (e) {
+    if (e.response?.status === 422) {
+      setErreur("Cet email est déjà utilisé.")
+    } else {
+      setErreur("Une erreur est survenue. Réessayez.")
+    }
+  }
+}
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6 py-16">

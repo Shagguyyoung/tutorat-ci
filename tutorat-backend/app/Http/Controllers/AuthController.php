@@ -62,16 +62,16 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'token' => $token,
-            'user'  => [
-                'id'     => $user->id,
-                'email'  => $user->email,
-                'role'   => $user->role,
-                'prenom' => $user->profile->prenom,
-                'nom'    => $user->profile->nom,
-            ]
-        ]);
+return response()->json([
+    'token' => $token,
+    'user'  => [
+        'id'     => $user->id,
+        'email'  => $user->email,
+        'role'   => $user->role,
+        'prenom' => $user->profile?->prenom ?? '',
+        'nom'    => $user->profile?->nom ?? '',
+    ]
+]);
     }
 
     public function deconnexion(Request $request)

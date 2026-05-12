@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useAuth } from "../AuthContext"
+import { Link, useNavigate } from "react-router-dom"
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 
 export default function ConnexionPage() {
@@ -7,19 +8,31 @@ export default function ConnexionPage() {
     const [motDePasse, setMotDePasse] = useState("")
     const [afficherMdp, setAfficherMdp] = useState(false)
     const [erreur, setErreur] = useState("")
+    const { connexion } = useAuth()
+    const navigate = useNavigate()
 
-    function handleSubmit(e) {
-        e.preventDefault()
-        setErreur("")
+    async function handleSubmit(e) {
+  e.preventDefault()
+  setErreur("")
 
-        //Validation simple
-        if (!email || !motDePasse) {
-            setErreur("Veuiller remplir tous les champs.")
-            return
-        }
-        // Ici on appeler L'API Laravel plus tard
-        alert('connexion avec : ${email}')
+  if (!email || !motDePasse) {
+    setErreur("Veuillez remplir tous les champs.")
+    return
+  }
+
+  try {
+    const user = await connexion(email, motDePasse)
+    // Rediriger selon le rôle
+    if (user.role === "tuteur") {
+      navigate("/dashboard-tuteur")
+    } else {
+      navigate("/dashboard")
     }
+  } catch (e) {
+    setErreur("Email ou mot de passe incorrect.")
+  }
+}
+
 
 
   return (

@@ -25,9 +25,9 @@ class TuteurController extends Controller
         return response()->json($query->orderByDesc('note_moyenne')->get());
     }
 
-    public function show($id)
+        public function show($id)
     {
-        $profile = Profile::with(['user', 'reviews.eleve'])->findOrFail($id);
+        $profile = Profile::with(['user', 'reviews.eleve.profile'])->findOrFail($id);
         return response()->json($profile);
     }
 }
