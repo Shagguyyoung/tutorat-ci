@@ -1,33 +1,22 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../AuthContext"
 import { Link, useNavigate } from "react-router-dom"
-import { BookOpen, Calendar, Star, LogOut, User, Clock } from "lucide-react"
+import { BookOpen, LogOut, Clock, Star, Search } from "lucide-react"
 import api from "../api"
+import StatCard from "../components/StatCard"
+import CarteSession from "../components/CarteSession"
+import FormulaireNotation from "../components/FormulaireNotation"
 import BoutonPaiement from "../components/BoutonPaiement"
-
-const STATUT_STYLE = {
-  confirme:   "bg-emerald-50 text-emerald-700",
-  en_attente: "bg-amber-50 text-amber-700",
-  termine:    "bg-gray-100 text-gray-500",
-  annule:     "bg-red-50 text-red-500",
-}
-
-const STATUT_LABEL = {
-  confirme:   "Confirmé",
-  en_attente: "En attente",
-  termine:    "Terminé",
-  annule:     "Annulé",
-}
 
 export default function DashboardPage() {
   const { utilisateur, deconnexion } = useAuth()
   const navigate = useNavigate()
   const [sessions, setSessions] = useState([])
   const [chargement, setChargement] = useState(true)
+  const [notationSession, setNotationSession] = useState(null)
+  const [onglet, setOnglet] = useState("toutes")
 
-  useEffect(() => {
-    chargerSessions()
-  }, [])
+  useEffect(() => { chargerSessions() }, [])
 
   async function chargerSessions() {
     try {
@@ -45,8 +34,14 @@ export default function DashboardPage() {
     navigate("/")
   }
 
-  // Calcul des stats
-  const nbTerminees = sessions.filter(s => s.statut === "termine").length
+  // Filtrage par onglet
+  const sessionsFiltrees = sessions.filter(s => {
+    if (onglet === "toutes") return true
+    return s.statut === onglet
+  })
+
+  // Stats
+  const nbTerminees  = sessions.filter(s => s.statut === "termine").length
   const nbConfirmees = sessions.filter(s => s.statut === "confirme").length
   const heures = sessions.reduce((acc, s) => acc + s.duree_minutes, 0) / 60
 
@@ -57,121 +52,138 @@ export default function DashboardPage() {
         {/* En-tête */}
         <div className="flex items-center justify-between mb-10">
           <div>
+            <p className="text-gray-400 text-sm font-medium mb-1">Tableau de bord</p>
             <h1 className="text-3xl font-extrabold text-gray-900">
-              Bonjour, {utilisateur?.prenom || "Élève"} 👋
+              Bonjour, {utilisateur?.prenom} 👋
             </h1>
-            <p className="text-gray-400 mt-1">Voici un résumé de vos activités</p>
           </div>
-          <button
-            onClick={handleDeconnexion}
-            className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors text-sm font-medium"
-          >
-            <LogOut className="w-4 h-4" />
-            Déconnexion
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/recherche"
+              className="hidden md:flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+            >
+              <Search className="w-4 h-4" />
+              Trouver un tuteur
+            </Link>
+            <button
+              onClick={handleDeconnexion}
+              className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition-colors text-sm"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Statistiques */}
+        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {[
-            { label: "Séances totales", valeur: sessions.length, icon: BookOpen, color: "text-violet-600 bg-violet-50" },
-            { label: "Heures apprises", valeur: `${heures.toFixed(1)}h`, icon: Clock, color: "text-blue-600 bg-blue-50" },
-            { label: "Confirmées", valeur: nbConfirmees, icon: User, color: "text-emerald-600 bg-emerald-50" },
-            { label: "Terminées", valeur: nbTerminees, icon: Star, color: "text-amber-600 bg-amber-50" },
-          ].map(s => (
-            <div key={s.label} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <div className={`w-10 h-10 rounded-xl ${s.color} flex items-center justify-center mb-3`}>
-                <s.icon className="w-5 h-5" />
-              </div>
-              <div className="text-2xl font-extrabold text-gray-900">{s.valeur}</div>
-              <div className="text-xs text-gray-400 mt-1">{s.label}</div>
-            </div>
-          ))}
+          <StatCard icon={BookOpen} valeur={sessions.length} label="Séances totales" color="bg-violet-50 text-violet-600" />
+          <StatCard icon={Clock} valeur={`${heures.toFixed(1)}h`} label="Heures apprises" color="bg-blue-50 text-blue-600" />
+          <StatCard icon={Star} valeur={nbConfirmees} label="Confirmées" color="bg-emerald-50 text-emerald-600" />
+          <StatCard icon={BookOpen} valeur={nbTerminees} label="Terminées" color="bg-amber-50 text-amber-600" />
         </div>
 
         {/* Séances */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-8 pt-8 pb-4">
             <h2 className="text-xl font-bold text-gray-900">Mes séances</h2>
-            <Link
-              to="/recherche"
-              className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
-            >
-              + Nouvelle séance
+            <Link to="/recherche" className="text-violet-600 text-sm font-semibold hover:underline md:hidden">
+              + Nouvelle
             </Link>
           </div>
 
-          {chargement ? (
-            <div className="text-center py-10">
-              <div className="w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <p className="text-gray-400 mt-3 text-sm">Chargement...</p>
-            </div>
-          ) : sessions.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-4xl mb-3">📚</p>
-              <p className="text-gray-500">Vous n'avez pas encore de séance.</p>
-              <Link
-                to="/recherche"
-                className="mt-4 inline-block text-violet-600 font-semibold hover:underline"
+          {/* Onglets */}
+          <div className="flex gap-1 px-8 pb-4 overflow-x-auto">
+            {[
+              { key: "toutes", label: "Toutes", count: sessions.length },
+              { key: "en_attente", label: "En attente", count: sessions.filter(s => s.statut === "en_attente").length },
+              { key: "confirme", label: "Confirmées", count: nbConfirmees },
+              { key: "termine", label: "Terminées", count: nbTerminees },
+            ].map(o => (
+              <button
+                key={o.key}
+                onClick={() => setOnglet(o.key)}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+                  onglet === o.key
+                    ? "bg-violet-600 text-white"
+                    : "text-gray-500 hover:bg-gray-100"
+                }`}
               >
-                Trouver un tuteur →
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {sessions.map(s => (
-                <div key={s.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white font-bold shadow">
-                      {s.tuteur?.prenom?.[0]}{s.tuteur?.nom?.[0]}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {s.tuteur?.prenom} {s.tuteur?.nom}
-                      </p>
-                      <p className="text-violet-600 text-sm">{s.matiere}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Calendar className="w-3 h-3 text-gray-400" />
-                        <span className="text-xs text-gray-400">
-                          {new Date(s.date_heure).toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })} à {new Date(s.date_heure).toLocaleTimeString("fr-FR", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
+                {o.label}
+                {o.count > 0 && (
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                    onglet === o.key ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+                  }`}>
+                    {o.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Liste */}
+          <div className="px-8 pb-8">
+            {chargement ? (
+              <div className="text-center py-16">
+                <div className="w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="text-gray-400 mt-3 text-sm">Chargement...</p>
+              </div>
+            ) : sessionsFiltrees.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-4xl mb-3">📚</p>
+                <p className="text-gray-500">Aucune séance dans cette catégorie.</p>
+                <Link to="/recherche" className="mt-4 inline-block text-violet-600 font-semibold hover:underline">
+                  Trouver un tuteur →
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {sessionsFiltrees.map(s => (
+                  <div key={s.id}>
+                    <CarteSession
+                      session={s}
+                      nomPrincipal={`${s.tuteur?.prenom || ""} ${s.tuteur?.nom || ""}`}
+                      actions={
+                        <div className="flex items-center gap-2">
+                          {s.statut === "confirme" && (
+                            <BoutonPaiement sessionId={s.id} montant={s.montant} />
+                          )}
+                          {s.statut === "termine" && (
+                            <button
+                              onClick={() => setNotationSession(notationSession === s.id ? null : s.id)}
+                              className="text-xs font-semibold text-amber-500 hover:text-amber-600 whitespace-nowrap"
+                            >
+                              {notationSession === s.id ? "Annuler" : "⭐ Noter"}
+                            </button>
+                          )}
+                        </div>
+                      }
+                    />
+                    {notationSession === s.id && (
+                      <div className="mt-2 ml-16">
+                        <FormulaireNotation
+                          sessionId={s.id}
+                          onSuccess={() => { setNotationSession(null); chargerSessions() }}
+                        />
                       </div>
-                    </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-3">
-  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUT_STYLE[s.statut]}`}>
-    {STATUT_LABEL[s.statut]}
-  </span>
-  <span className="font-bold text-gray-900 text-sm">
-    {Number(s.montant).toLocaleString()} F
-  </span>
-  {s.statut === "confirme" && !s.payment && (
-    <BoutonPaiement
-      sessionId={s.id}
-      montant={s.montant}
-    />
-  )}
-</div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Bouton recherche */}
-        <div className="bg-gradient-to-br from-violet-600 to-violet-800 rounded-3xl p-8 text-center">
-          <h2 className="text-xl font-extrabold text-white">Besoin d'un tuteur ?</h2>
-          <p className="text-violet-200 mt-2">Trouvez le tuteur idéal près de chez vous.</p>
+        {/* CTA bas */}
+        <div className="mt-6 bg-gradient-to-br from-violet-600 to-violet-800 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="text-xl font-extrabold text-white">Besoin d'un tuteur ?</h3>
+            <p className="text-violet-200 mt-1 text-sm">Trouvez le tuteur idéal près de chez vous.</p>
+          </div>
           <Link
             to="/recherche"
-            className="mt-6 inline-block bg-white text-violet-700 font-bold px-8 py-3.5 rounded-2xl hover:bg-violet-50 transition-colors"
+            className="bg-white text-violet-700 font-bold px-8 py-3.5 rounded-2xl hover:bg-violet-50 transition-colors whitespace-nowrap"
           >
             Chercher un tuteur →
           </Link>

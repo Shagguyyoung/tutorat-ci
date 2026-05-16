@@ -52,6 +52,8 @@ class PaymentController extends Controller
 
         $data = $response->json();
 
+        \Log::info('CinetPay response', $data);
+
         if ($data['code'] === '201') {
             return response()->json([
                 'payment_url' => $data['data']['payment_url'],

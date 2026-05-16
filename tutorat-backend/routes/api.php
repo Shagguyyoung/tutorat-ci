@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TuteurController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ReviewController;
 
 Route::post('/inscription', [AuthController::class, 'inscription']);
 Route::post('/connexion', [AuthController::class, 'connexion']);
@@ -20,4 +21,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/mes-sessions-tuteur', [SessionController::class, 'sessionsComeTuteur']);
     Route::patch('/sessions/{id}/statut', [SessionController::class, 'updateStatut']);
     Route::post('/paiement/initier', [PaymentController::class, 'initier']);
+    Route::post('/reviews', [ReviewController::class, 'store']);
 });

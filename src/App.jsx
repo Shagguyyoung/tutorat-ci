@@ -10,6 +10,7 @@ import InscriptionPage from "./pages/InscriptionPage"
 import DashboardPage from "./pages/DashboardPage"
 import DashboardTuteurPage from "./pages/DashboardTuteurPage"
 import ReservationPage from "./pages/ReservationPage"
+import Footer from "./components/Footer"
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
           } />
   
         </Routes>
+        <Footer />
       </AuthProvider>
     </BrowserRouter>
   )
