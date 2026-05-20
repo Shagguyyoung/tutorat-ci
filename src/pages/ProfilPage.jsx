@@ -3,6 +3,7 @@ import { MapPin, Star, Clock, BookOpen, ArrowLeft } from "lucide-react"
 import { Link, useParams } from "react-router-dom"
 import api from "../api"
 import { useAuth } from "../AuthContext"
+import { useNavigate } from "react-router-dom"
 
 function Etoiles({ note }) {
   return (
@@ -20,6 +21,7 @@ export default function ProfilPage() {
   const [tuteur, setTuteur] = useState(null)
   const [chargement, setChargement] = useState(true)
   const [erreur, setErreur] = useState("")
+  const navigate = useNavigate()
 
   useEffect(() => {
     chargerTuteur()
@@ -198,19 +200,27 @@ export default function ProfilPage() {
               </div>
 
               {utilisateur ? (
-                utilisateur.role === "eleve" ? (
-                  <Link
-                    to={`/reserver/${tuteur.id}`}
-                    className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-4 rounded-2xl transition-colors text-center block"
-                  >
-                    Réserver une séance
-                  </Link>
-                ) : (
-                  <p className="text-center text-gray-400 text-sm">
-                    Seuls les élèves peuvent réserver.
-                  </p>
-                )
-              ) : (
+  utilisateur.role === "eleve" ? (
+    <>
+      <Link
+        to={`/reserver/${tuteur.id}`}
+        className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-4 rounded-2xl transition-colors text-center block"
+      >
+        Réserver une séance
+      </Link>
+      <button
+        onClick={() => navigate(`/messages/${tuteur.user_id}`)}
+        className="w-full mt-3 border border-gray-200 text-gray-700 font-semibold py-3.5 rounded-2xl hover:border-violet-400 hover:text-violet-600 transition-colors"
+      >
+        Envoyer un message
+      </button>
+    </>
+  ) : (
+    <p className="text-center text-gray-400 text-sm">
+      Seuls les élèves peuvent réserver.
+    </p>
+  )
+) : (
                 <Link
                   to="/connexion"
                   className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-4 rounded-2xl transition-colors text-center block"

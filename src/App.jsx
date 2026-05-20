@@ -11,6 +11,7 @@ import DashboardPage from "./pages/DashboardPage"
 import DashboardTuteurPage from "./pages/DashboardTuteurPage"
 import ReservationPage from "./pages/ReservationPage"
 import Footer from "./components/Footer"
+import MessageriePage from "./pages/MessageriePage"
 
 function App() {
   return (
@@ -43,6 +44,17 @@ function App() {
               <DashboardTuteurPage />
             </RoutePrivee>
           } />
+
+          <Route path="/messages" element={
+  <RoutePrivee>
+    <MessageriePage />
+  </RoutePrivee>
+} />
+<Route path="/messages/:userId" element={
+  <RoutePrivee>
+    <MessageriePage />
+  </RoutePrivee>
+} />
   
         </Routes>
         <Footer />

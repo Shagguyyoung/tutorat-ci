@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Menu, X, LogOut, LayoutDashboard } from "lucide-react"
 import { useAuth } from "../AuthContext"
+import { MessageSquare } from "lucide-react"
 
 export default function Navbar() {
   const [menuOuvert, setMenuOuvert] = useState(false)
@@ -72,6 +73,13 @@ export default function Navbar() {
               >
                 <LogOut className="w-4 h-4" />
               </button>
+
+                          <Link
+                              to="/messages"
+                              className="text-gray-400 hover:text-violet-600 transition-colors"
+                            >
+                             <MessageSquare className="w-5 h-5" />
+                        </Link>
             </>
           ) : (
             // Non connecté
