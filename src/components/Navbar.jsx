@@ -1,151 +1,180 @@
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { Menu, X, LogOut, LayoutDashboard } from "lucide-react"
-import { useAuth } from "../AuthContext"
-import { MessageSquare } from "lucide-react"
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, X, LogOut, LayoutDashboard, MessageSquare } from "lucide-react";
+import { useAuth } from "../AuthContext";
 
 export default function Navbar() {
-  const [menuOuvert, setMenuOuvert] = useState(false)
-  const { utilisateur, deconnexion } = useAuth()
-  const navigate = useNavigate()
+  const [menuOuvert, setMenuOuvert] = useState(false);
+  const { utilisateur, deconnexion } = useAuth();
+  const navigate = useNavigate();
 
   function handleDeconnexion() {
-    deconnexion()
-    navigate("/")
-    setMenuOuvert(false)
+    deconnexion();
+    navigate("/");
+    setMenuOuvert(false);
   }
 
   function lienDashboard() {
-    if (utilisateur?.role === "tuteur") return "/dashboard-tuteur"
-    if (utilisateur?.role === "admin") return "/admin"
-    return "/dashboard"
+    if (utilisateur?.role === "tuteur") return "/dashboard-tuteur";
+    if (utilisateur?.role === "admin") return "/admin";
+    return "/dashboard";
   }
 
   return (
-    <nav className="bg-white border-b border-gray-100 px-6 py-4">
-      <div className="max-w-5xl mx-auto flex items-center justify-between">
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-zinc-200">
+      <div className="max-w-6xl mx-auto px-6 py-5">
+        <div className="flex items-center justify-between">
 
-        {/* Logo */}
-        <Link to="/" className="text-xl font-extrabold text-violet-600">
-          Tutorat<span className="text-gray-900">CI</span>
-        </Link>
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-9 h-9 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-md transition-transform group-hover:rotate-12">
+              T
+            </div>
+            <div className="font-black text-3xl tracking-tighter">
+              tutorat<span className="text-violet-600">CI</span>
+            </div>
+          </Link>
 
-        {/* Liens desktop */}
-        <div className="hidden md:flex items-center gap-8">
-          <Link to="/" className="text-gray-600 hover:text-violet-600 transition-colors text-sm font-medium">
-            Accueil
-          </Link>
-          <Link to="/recherche" className="text-gray-600 hover:text-violet-600 transition-colors text-sm font-medium">
-            Trouver un tuteur
-          </Link>
-          {!utilisateur && (
-            <Link to="/devenir-tuteur" className="text-gray-600 hover:text-violet-600 transition-colors text-sm font-medium">
-              Devenir tuteur
+          {/* Liens Desktop */}
+          <div className="hidden md:flex items-center gap-9">
+            <Link 
+              to="/" 
+              className="text-zinc-600 hover:text-zinc-900 font-medium transition-colors"
+            >
+              Accueil
             </Link>
-          )}
+            <Link 
+              to="/recherche" 
+              className="text-zinc-600 hover:text-zinc-900 font-medium transition-colors"
+            >
+              Trouver un tuteur
+            </Link>
+            {!utilisateur && (
+              <Link 
+                to="/devenir-tuteur" 
+                className="text-zinc-600 hover:text-zinc-900 font-medium transition-colors"
+              >
+                Devenir tuteur
+              </Link>
+            )}
+          </div>
+
+          {/* Zone droite - Desktop */}
+          <div className="hidden md:flex items-center gap-4">
+            {utilisateur ? (
+              <>
+                {/* Messages */}
+                <Link
+                  to="/messages"
+                  className="p-3 text-zinc-500 hover:text-violet-600 hover:bg-violet-50 rounded-2xl transition-all"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                </Link>
+
+                {/* Dashboard + Nom */}
+                <Link
+                  to={lienDashboard()}
+                  className="flex items-center gap-3 px-4 py-2 hover:bg-zinc-50 rounded-2xl transition-all group"
+                >
+                  <LayoutDashboard className="w-5 h-5 text-zinc-500 group-hover:text-violet-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-800">{utilisateur.prenom}</p>
+                    <p className="text-[10px] text-zinc-400 -mt-1">Tableau de bord</p>
+                  </div>
+                </Link>
+
+                {/* Badge Role */}
+                <span className={`text-xs font-bold px-4 py-1.5 rounded-full ${
+                  utilisateur.role === "tuteur"
+                    ? "bg-violet-100 text-violet-700"
+                    : utilisateur.role === "admin"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-emerald-100 text-emerald-700"
+                }`}>
+                  {utilisateur.role === "tuteur" ? "Tuteur" : utilisateur.role === "admin" ? "Admin" : "Élève"}
+                </span>
+
+                {/* Déconnexion */}
+                <button
+                  onClick={handleDeconnexion}
+                  className="p-3 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/connexion"
+                  className="px-6 py-2.5 text-sm font-semibold text-zinc-700 hover:text-zinc-900 transition-colors"
+                >
+                  Connexion
+                </Link>
+                <Link
+                  to="/inscription"
+                  className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-6 py-2.5 rounded-2xl transition-all active:scale-95"
+                >
+                  S'inscrire
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Bouton Mobile */}
+          <button
+            className="md:hidden p-3 text-zinc-600"
+            onClick={() => setMenuOuvert(!menuOuvert)}
+          >
+            {menuOuvert ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
-
-        {/* Boutons droite */}
-        <div className="hidden md:flex items-center gap-3">
-
-          {utilisateur ? (
-            // Utilisateur connecté
-            <>
-              <Link
-                to={lienDashboard()}
-                className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-violet-600 transition-colors"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                {utilisateur.prenom}
-              </Link>
-              <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                utilisateur.role === "tuteur"
-                  ? "bg-violet-100 text-violet-700"
-                  : utilisateur.role === "admin"
-                  ? "bg-red-100 text-red-700"
-                  : "bg-emerald-100 text-emerald-700"
-              }`}>
-                {utilisateur.role === "tuteur" ? "Tuteur" : utilisateur.role === "admin" ? "Admin" : "Élève"}
-              </span>
-              <button
-                onClick={handleDeconnexion}
-                className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-500 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-
-                          <Link
-                              to="/messages"
-                              className="text-gray-400 hover:text-violet-600 transition-colors"
-                            >
-                             <MessageSquare className="w-5 h-5" />
-                        </Link>
-            </>
-          ) : (
-            // Non connecté
-            <>
-              <Link
-                to="/connexion"
-                className="text-sm font-semibold text-gray-700 hover:text-violet-600 transition-colors"
-              >
-                Connexion
-              </Link>
-              <Link
-                to="/inscription"
-                className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
-              >
-                S'inscrire
-              </Link>
-            </>
-          )}
-
-        </div>
-
-        {/* Bouton menu mobile */}
-        <button
-          className="md:hidden text-gray-600"
-          onClick={() => setMenuOuvert(!menuOuvert)}
-        >
-          {menuOuvert ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
       </div>
 
-      {/* Menu mobile */}
+      {/* Menu Mobile */}
       {menuOuvert && (
-        <div className="md:hidden mt-4 flex flex-col gap-4 px-2 pb-4 border-t border-gray-100 pt-4">
-          <Link to="/" className="text-gray-700 font-medium" onClick={() => setMenuOuvert(false)}>Accueil</Link>
-          <Link to="/recherche" className="text-gray-700 font-medium" onClick={() => setMenuOuvert(false)}>Trouver un tuteur</Link>
+        <div className="md:hidden border-t bg-white px-6 py-6">
+          <div className="flex flex-col gap-5">
+            <Link to="/" className="text-lg font-medium" onClick={() => setMenuOuvert(false)}>Accueil</Link>
+            <Link to="/recherche" className="text-lg font-medium" onClick={() => setMenuOuvert(false)}>Trouver un tuteur</Link>
 
-          {utilisateur ? (
-            <>
-              <Link
-                to={lienDashboard()}
-                className="text-gray-700 font-medium"
-                onClick={() => setMenuOuvert(false)}
-              >
-                Mon dashboard
-              </Link>
-              <button
-                onClick={handleDeconnexion}
-                className="text-left text-red-500 font-medium"
-              >
-                Déconnexion
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/connexion" className="text-gray-700 font-medium" onClick={() => setMenuOuvert(false)}>Connexion</Link>
-              <Link
-                to="/inscription"
-                className="bg-violet-600 text-white text-center font-semibold px-4 py-2 rounded-xl"
-                onClick={() => setMenuOuvert(false)}
-              >
-                S'inscrire
-              </Link>
-            </>
-          )}
+            {utilisateur ? (
+              <>
+                <Link 
+                  to={lienDashboard()} 
+                  className="text-lg font-medium" 
+                  onClick={() => setMenuOuvert(false)}
+                >
+                  Mon Dashboard
+                </Link>
+                <Link 
+                  to="/messages" 
+                  className="text-lg font-medium" 
+                  onClick={() => setMenuOuvert(false)}
+                >
+                  Messages
+                </Link>
+                <button
+                  onClick={handleDeconnexion}
+                  className="text-left text-red-600 font-medium text-lg"
+                >
+                  Déconnexion
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/connexion" className="text-lg font-medium" onClick={() => setMenuOuvert(false)}>Connexion</Link>
+                <Link 
+                  to="/inscription" 
+                  className="bg-violet-600 text-white text-center font-semibold py-3.5 rounded-2xl mt-4"
+                  onClick={() => setMenuOuvert(false)}
+                >
+                  S'inscrire
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       )}
     </nav>
-  )
+  );
 }
