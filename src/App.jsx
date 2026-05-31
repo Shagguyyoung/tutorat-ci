@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom"
+import { AnimatePresence } from "framer-motion"
 import { AuthProvider } from "./AuthContext"
 import Navbar from "./components/Navbar"
 import RoutePrivee from "./components/RoutePrivee"
@@ -13,12 +14,15 @@ import ReservationPage from "./pages/ReservationPage"
 import Footer from "./components/Footer"
 import MessageriePage from "./pages/MessageriePage"
 
-function App() {
+function AppContent() {
+  const location = useLocation()
+
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Navbar />
-        <Routes>
+    <>
+      <Navbar />
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+
           {/* Routes publiques */}
           <Route path="/" element={<HomePage />} />
           <Route path="/recherche" element={<RecherchePage />} />
@@ -45,19 +49,30 @@ function App() {
             </RoutePrivee>
           } />
 
+          {/* Routes privées — messages */}
           <Route path="/messages" element={
-  <RoutePrivee>
-    <MessageriePage />
-  </RoutePrivee>
-} />
-<Route path="/messages/:userId" element={
-  <RoutePrivee>
-    <MessageriePage />
-  </RoutePrivee>
-} />
-  
+            <RoutePrivee>
+              <MessageriePage />
+            </RoutePrivee>
+          } />
+          <Route path="/messages/:userId" element={
+            <RoutePrivee>
+              <MessageriePage />
+            </RoutePrivee>
+          } />
+
         </Routes>
-        <Footer />
+      </AnimatePresence>
+      <Footer />
+    </>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppContent />
       </AuthProvider>
     </BrowserRouter>
   )
